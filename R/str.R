@@ -5,14 +5,13 @@
 #' @export
 #' @inheritParams stringr::str_glue
 str_format <- function(..., .sep = "", .envir = parent.frame()) {
-  stringr::str_glue(..., .sep = .sep, .envir = .envir)
+  glue::glue(..., .sep = .sep, .envir = .envir)
 }
 
 #' @export
 #' @inheritParams stringr::str_glue
 str_format_map <- function(..., .data, .sep = "", .envir = parent.frame(), .na = "NA") {
-  if (missing(.data)) stop("`data` must be provided as a named argument.")
-  stringr::str_glue_data(.x = .data, ..., .sep = .sep, .envir = .envir, .na = .na)
+  glue::glue_data(.x, ..., .sep = .sep, .envir = .envir, .na = .na)
 }
 
 #########################################################################
@@ -24,14 +23,10 @@ str_format_map <- function(..., .data, .sep = "", .envir = parent.frame(), .na =
 #'
 #' @export
 str_lstrip <- function(string, chars = NULL) {
-  if (is.null(chars)) {
-    # trim whitespace
-    return(stringr::str_trim(string, "left"))
-  }
-  # trim given characters
-  chars <- re_escape(str_join("", chars))
-  pattern <- stringr::regex(str_join("", c("^[", chars, "]")))
-  stringr::str_replace_all(string, pattern, "")
+  chars <- if (is.null(chars)) "\\s" else chars
+  stopifnot(inherits(chars, "character"))
+  pattern <- stringi::stri_sprintf("^[%s]+", str_join("", chars))
+  stringi::stri_replace_all_regex(string, pattern, "")
 }
 
 #' Remove ``chars`` from the right end of a string. If ``chars`` is NULL,
@@ -39,14 +34,10 @@ str_lstrip <- function(string, chars = NULL) {
 #'
 #' @export
 str_rstrip <- function(string, chars = NULL) {
-  if (is.null(chars)) {
-    # trim whitespace
-    return(stringr::str_trim(string, "right"))
-  }
-  # trim given characters
-  chars <- stringi::stri_escape_unicode(str_join("", chars))
-  pattern <- stringr::regex(str_join("", c("[", chars, "]$")))
-  stringr::str_replace(string, pattern, "")
+  chars <- if (is.null(chars)) "\\s" else chars
+  stopifnot(inherits(chars, "character"))
+  pattern <- stringi::stri_sprintf("[%s]+$", str_join("", chars))
+  stringi::stri_replace_all_regex(string, pattern, "")
 }
 
 #' Remove ``chars`` from both ends of a string. If ``chars`` is NULL,
@@ -54,20 +45,10 @@ str_rstrip <- function(string, chars = NULL) {
 #'
 #' @export
 str_strip <- function(string, chars = NULL) {
-  if (is.null(chars)) {
-    # trim whitespace
-    return(stringr::str_trim(string, "both"))
-  }
-  # trim given characters
-  str_rstrip(str_lstrip(string, chars), chars)
-}
-
-#' Simplify redundant whitespace characters.
-#'
-#' @export
-#' @inheritParams stringr::str_squish
-str_normalize_whitespace <- function(string) {
-  stringr::str_squish(string)
+  chars <- if (is.null(chars)) "\\s" else chars
+  stopifnot(inherits(chars, "character"))
+  pattern <- stringi::stri_sprintf("^[%1$s]+|[%1$s]+$", str_join("", chars))
+  stringi::stri_replace_all_regex(string, pattern, "")
 }
 
 #########################################################################
@@ -78,24 +59,24 @@ str_normalize_whitespace <- function(string) {
 #'
 #' @export
 #' @inheritParams stringr::str_to_title
-str_title <- function(string, locale = "en") {
-  stringr::str_to_title(string, locale = locale)
+str_title <- function(string) {
+  stringi::stri_trans_totitle(string)
 }
 
 #' Convert a string to upper case.
 #'
 #' @export
 #' @inheritParams stringr::str_to_upper
-str_upper <- function(string, locale = "en") {
-  stringr::str_to_upper(string, locale = locale)
+str_upper <- function(string) {
+  stringi::stri_trans_toupper(string)
 }
 
 #' Convert a string to lower case.
 #'
 #' @export
 #' @inheritParams stringr::str_to_lower
-str_lower <- function(string, locale = "en") {
-  stringr::str_to_lower(string, locale = locale)
+str_lower <- function(string) {
+  stringi::stri_trans_tolower(string)
 }
 
 #' Convert a string to sentence case.
@@ -103,7 +84,13 @@ str_lower <- function(string, locale = "en") {
 #' @export
 #' @inheritParams stringr::str_to_sentence
 str_sentence <- function(string, locale = "en") {
-  stringr::str_to_sentence(string, locale = locale)
+  opts <- stringi::stri_opts_brkiter(type = "sentence")
+  stringi::stri_trans_totitle(string, opts_brkiter = opts)
+}
+
+#' @export
+str_casefold <- function(string) {
+  stringi::stri_trans_casefold(string)
 }
 
 #########################################################################
@@ -113,25 +100,22 @@ str_sentence <- function(string, locale = "en") {
 #' Check whether a string contains the substring.
 #'
 #' @export
-str_contains <- function(string, substring, negate = FALSE, ignore_case = FALSE) {
-  substring <- stringr::fixed(substring, ignore_case = ignore_case)
-  stringr::str_detect(string, substring, negate = negate)
+str_contains <- function(string, substring) {
+  stringi::stri_detect_fixed(string, substring)
 }
 
 #' Check whether a string starts with ``prefix``.
 #'
 #' @export
-str_startswith <- function(string, prefix, negate = FALSE, ignore_case = FALSE) {
-  prefix <- stringr::fixed(prefix, ignore_case = ignore_case)
-  stringr::str_starts(string, prefix, negate = negate)
+str_startswith <- function(string, prefix) {
+  stringi::stri_startswith_fixed(string, prefix)
 }
 
 #' Check whether a string ends with ``suffix``.
 #'
 #' @export
-str_endswith <- function(string, suffix, negate = FALSE, ignore_case = FALSE) {
-  suffix <- stringr::fixed(suffix, ignore_case = ignore_case)
-  stringr::str_ends(suffix, negate = negate)
+str_endswith <- function(string, suffix) {
+  stringi::stri_endswith_fixed(string, suffix)
 }
 
 .str_check <- function(pattern, string) {
@@ -142,56 +126,64 @@ str_endswith <- function(string, suffix, negate = FALSE, ignore_case = FALSE) {
 #'
 #' @export
 str_isupper <- function(string) {
-  .str_check("[:upper:]+", string)
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[A-Z]+", "")))
 }
 
 #' Check whether ``string`` only contains lowercase letters.
 #'
 #' @export
 str_islower <- function(string) {
-  .str_check("[:lower:]+", string)
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[a-z]+", "")))
 }
 
 #' Check whether ``string`` only contains whitespace characters.
 #'
 #' @export
 str_isspace <- function(string) {
-  .str_check("[:space:]+", string)
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[\\s]+", "")))
 }
 
 #' Check whether ``string`` only contains digits.
 #'
 #' @export
 str_isdigit <- function(string) {
-  .str_check("[:digit:]+", string)
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[0-9]+", "")))
 }
 
 #' Check whether ``string`` only contains letters.
 #'
 #' @export
 str_isalpha <- function(string) {
-  .str_check("[:alpha:]+", string)
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[a-zA-Z]+", "")))
 }
 
 #' Check whether ``string`` only contains letters and numbers.
 #'
 #' @export
 str_isalnum <- function(string) {
-  .str_check("[:alnum:]+", string)
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[a-zA-Z0-9]+", "")))
 }
 
 #' Check whether ``string`` only contains punctuation.
 #'
 #' @export
 str_ispunct <- function(string) {
-  .str_check("[:punct:]+")
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[:punct:]+", "")))
 }
 
 #' Check whether ``string`` only contains punctuation, letters, and numbers.
 #'
 #' @export
 str_isgraph <- function(string) {
-  .str_check("[:graph:]+")
+  stopifnot(inherits(string, "character"))
+  all(!nzchar(stringi::stri_replace_all_regex(string, "[:graph:]+", "")))
 }
 
 #########################################################################
@@ -203,8 +195,9 @@ str_isgraph <- function(string) {
 #'
 #' @export
 str_replace <- function(string, substring, replacement) {
-  pattern <- stringr::fixed(substring)
-  stringr::str_replace_all(string, pattern, replacement)
+  stringi::stri_replace_all_fixed(
+    string, substring, replacement
+  )
 }
 
 #' Same as str_replace, but ... is named arguments where each name is
@@ -225,48 +218,51 @@ str_replace_map <- function(.string, ...) {
 #'
 #' @export
 str_removeprefix <- function(string, prefix) {
-  pattern <- paste0("^", re_escape(prefix))
-  stringr::str_replace_all(string, pattern, "")
+  stringi::stri_replace_all_regex(
+    string, sprintf("^%s", prefix), ""
+  )
 }
 
 #' Remove a suffix from a string.
 #'
 #' @export
 str_removesuffix <- function(string, suffix) {
-  pattern <- paste0(re_escape(suffix), "$")
-  stringr::str_replace_all(string, pattern, "")
+  stringi::stri_replace_all_regex(
+    string, sprintf("%s$", prefix), ""
+  )
 }
 
 #' Replace each ``\t`` with spaces.
 #'
 #' @export
 str_expandtabs <- function(string, tabsize = 4) {
-  replacement <- str_rep(" ", tabsize)
-  stringr::str_replace_all(string, "\\t", replacement)
+  stringi::stri_replace_all_regex(
+    string, "\\t", str_rep(" ", tabsize)
+  )
 }
 
 #' Find the first occurence of ``substring``.
 #'
 #' @export
 str_find <- function(string, substring) {
-  pattern <- stringr::fixed(substring, ignore_case = FALSE)
-  suppressWarnings(vapply(
-    stringr::str_locate_all(string, pattern),
-    function(x) min(x[, "start"]),
-    numeric(1)
-  ))
+  stopifnot(all(lengths(string) == 1))
+  as.integer(
+    stringi::stri_locate_first_fixed(
+      string, substring, get_length = TRUE
+    )[, "start"]
+  )
 }
 
 #' Find the last occurence of ``substring``.
 #'
 #' @export
 str_rfind <- function(string, substring) {
-  pattern <- stringr::fixed(substring, ignore_case = FALSE)
-  suppressWarnings(vapply(
-    stringr::str_locate_all(string, pattern),
-    function(x) max(x[, "start"]),
-    numeric(1)
-  ))
+  stopifnot(all(lengths(string) == 1))
+  as.integer(
+    stringi::stri_locate_last_fixed(
+      string, substring, get_length = TRUE
+    )[, "start"]
+  )
 }
 
 #########################################################################
@@ -278,9 +274,7 @@ str_rfind <- function(string, substring) {
 #'
 #' @export
 str_rep <- function(string, times) {
-  checkmate::qassert(string, "S1")
-  checkmate::qassert(times, "N1[1,)")
-  stringr::str_dup(string, times)
+  stringi::stri_dup(string, times)
 }
 
 #' Count the number of times ``substring`` occurs within ``string``.
@@ -288,8 +282,7 @@ str_rep <- function(string, times) {
 #' @export
 #' @inheritParams stringr::str_count
 str_count <- function(string, substring) {
-  pattern <- stringr::fixed(substring, ignore_case = FALSE)
-  stringr::str_count(string, pattern)
+  stringi::stri_count_fixed(string, substring)
 }
 
 #' Count the number of times a regular expression occurs in ``string``.
@@ -305,15 +298,15 @@ str_count_regex <- function(string, pattern, ...) {
 #' determines the number of splits to apply.
 #'
 #' @export
-str_split <- function(string, char = " ", n = Inf) {
-  stringr::str_split_fixed(string, pattern = char, n = n)
+str_split <- function(string, char = " ", n = -1L) {
+  stringi::stri_split_fixed(string, pattern = char, n = n)
 }
 
 #' Split ``string`` on newline characters ('\n').
 #'
 #' @export
-str_splitlines <- function(string) {
-  stringr::str_split_fixed(string, pattern = "\n", n = Inf)
+str_splitlines <- function(string, omit_empty = TRUE) {
+  stringi::stri_split_lines(string, omit_empty = omit_empty = )
 }
 
 #' Join multiple strings into a single string
@@ -326,18 +319,19 @@ str_splitlines <- function(string) {
 #' @export
 #' @param sep string inserted between each character
 str_join <- function(sep, ...) {
-  checkmate::qassert(sep, "S1")
-  if (...length() == 1) {
+  stopifnot(length(sep) == 1)
+  if (...length() == 1 && class(..1) == "list") {
     # flatten
-    return(stringr::str_flatten(..1, collapse = sep))
+    return(stringi::stri_join(unlist(..1), collapse = sep))
   }
   # concatenate
-  return(stringr::str_c(..., sep = sep))
+  return(stringi::stri_join(..., collapse = sep))
 }
 
 #' @export
-#' @importFrom stringr str_length
-stringr::str_length
+str_length <- function(string) {
+  stringi::stri_length(string)
+}
 
 #########################################################################
 ######### Text wrapping
@@ -358,21 +352,21 @@ stringr::str_length
 #'  each paragraph
 #' @param break_long_words If `FALSE`, the default, wrapping will only occur at
 #'   whitespace. If `TRUE`, can break on any non-word character (e.g. `/`, `-`).
+#' @param simplify If `TRUE` output is concatenated with newlines.
 #' @return A character vector of re-wrapped strings.
 #' @export
 str_textwrap <- function(string,
                          width = 70,
                          initial_indent = 0,
                          subsequent_indent = 0,
-                         break_long_words = FALSE) {
-  checkmate::qassert(width, "N1()")
-  checkmate::qassert(initial_indent, "N1()")
-  checkmate::qassert(subsequent_indent, "N1()")
-  checkmate::qassert(break_long_words, "B1")
-
+                         break_long_words = FALSE,
+                         simplify = FALSE) {
   out <- stringi::stri_wrap(string,
     width = width, indent = initial_indent, exdent = subsequent_indent,
     whitespace_only = !break_long_words, simplify = FALSE
   )
-  vapply(out, stringr::str_c, collapse = "\n", character(1))
+  if (isTRUE(simplify)) {
+    out <- sapply(out, stringi::stri_c, collapse = "\n")
+  }
+  out
 }
