@@ -5,7 +5,7 @@
 \title{Split \code{string} on \code{char}. Passing a value for \code{n}
 determines the number of splits to apply.}
 \usage{
-str_split(string, char = " ", n = Inf)
+str_split(string, char = " ", n = -1L)
 }
 \description{
 Split \code{string} on \code{char}. Passing a value for \code{n}

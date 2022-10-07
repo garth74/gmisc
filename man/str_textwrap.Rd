@@ -9,7 +9,8 @@ str_textwrap(
   width = 70,
   initial_indent = 0,
   subsequent_indent = 0,
-  break_long_words = FALSE
+  break_long_words = FALSE,
+  simplify = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ each paragraph}
 
 \item{break_long_words}{If \code{FALSE}, the default, wrapping will only occur at
 whitespace. If \code{TRUE}, can break on any non-word character (e.g. \code{/}, \code{-}).}
+
+\item{simplify}{If \code{TRUE} output is concatenated with newlines.}
 }
 \value{
 A character vector of re-wrapped strings.

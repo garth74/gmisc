@@ -4,13 +4,10 @@
 \alias{str_lower}
 \title{Convert a string to lower case.}
 \usage{
-str_lower(string, locale = "en")
+str_lower(string)
 }
 \arguments{
 \item{string}{String to modify}
-
-\item{locale}{Locale to use for translations. Defaults to "en" (English)
-to ensure consistent default ordering across platforms.}
 }
 \description{
 Convert a string to lower case.

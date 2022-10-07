@@ -4,7 +4,7 @@
 \alias{str_contains}
 \title{Check whether a string contains the substring.}
 \usage{
-str_contains(string, substring, negate = FALSE, ignore_case = FALSE)
+str_contains(string, substring)
 }
 \description{
 Check whether a string contains the substring.

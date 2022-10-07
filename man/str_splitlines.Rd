@@ -2,10 +2,10 @@
 % Please edit documentation in R/str.R
 \name{str_splitlines}
 \alias{str_splitlines}
-\title{Split \code{string} on newline characters ('\n').}
+\title{Split \code{string} on newline characters.}
 \usage{
-str_splitlines(string)
+str_splitlines(string, omit_empty = TRUE)
 }
 \description{
-Split \code{string} on newline characters ('\n').
+Split \code{string} on newline characters.
 }

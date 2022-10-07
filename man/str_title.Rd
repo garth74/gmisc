@@ -4,13 +4,10 @@
 \alias{str_title}
 \title{Convert a string to title case.}
 \usage{
-str_title(string, locale = "en")
+str_title(string)
 }
 \arguments{
 \item{string}{String to modify}
-
-\item{locale}{Locale to use for translations. Defaults to "en" (English)
-to ensure consistent default ordering across platforms.}
 }
 \description{
 Convert a string to title case.

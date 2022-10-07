@@ -4,7 +4,7 @@
 \alias{str_startswith}
 \title{Check whether a string starts with \code{prefix}.}
 \usage{
-str_startswith(string, prefix, negate = FALSE, ignore_case = FALSE)
+str_startswith(string, prefix)
 }
 \description{
 Check whether a string starts with \code{prefix}.

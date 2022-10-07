@@ -11,7 +11,7 @@ str_format <- function(..., .sep = "", .envir = parent.frame()) {
 #' @export
 #' @inheritParams stringr::str_glue
 str_format_map <- function(..., .data, .sep = "", .envir = parent.frame(), .na = "NA") {
-  glue::glue_data(.x, ..., .sep = .sep, .envir = .envir, .na = .na)
+  glue::glue_data(.data, ..., .sep = .sep, .envir = .envir, .na = .na)
 }
 
 #########################################################################
@@ -228,7 +228,7 @@ str_removeprefix <- function(string, prefix) {
 #' @export
 str_removesuffix <- function(string, suffix) {
   stringi::stri_replace_all_regex(
-    string, sprintf("%s$", prefix), ""
+    string, sprintf("%s$", suffix), ""
   )
 }
 
@@ -302,11 +302,11 @@ str_split <- function(string, char = " ", n = -1L) {
   stringi::stri_split_fixed(string, pattern = char, n = n)
 }
 
-#' Split ``string`` on newline characters ('\n').
+#' Split ``string`` on newline characters.
 #'
 #' @export
 str_splitlines <- function(string, omit_empty = TRUE) {
-  stringi::stri_split_lines(string, omit_empty = omit_empty = )
+  stringi::stri_split_lines(string, omit_empty = omit_empty)
 }
 
 #' Join multiple strings into a single string
@@ -320,7 +320,7 @@ str_splitlines <- function(string, omit_empty = TRUE) {
 #' @param sep string inserted between each character
 str_join <- function(sep, ...) {
   stopifnot(length(sep) == 1)
-  if (...length() == 1 && class(..1) == "list") {
+  if (...length() == 1 && inherits(..1, "list")) {
     # flatten
     return(stringi::stri_join(unlist(..1), collapse = sep))
   }

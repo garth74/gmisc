@@ -4,13 +4,10 @@
 \alias{str_upper}
 \title{Convert a string to upper case.}
 \usage{
-str_upper(string, locale = "en")
+str_upper(string)
 }
 \arguments{
 \item{string}{String to modify}
-
-\item{locale}{Locale to use for translations. Defaults to "en" (English)
-to ensure consistent default ordering across platforms.}
 }
 \description{
 Convert a string to upper case.

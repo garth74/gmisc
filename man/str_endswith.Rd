@@ -4,7 +4,7 @@
 \alias{str_endswith}
 \title{Check whether a string ends with \code{suffix}.}
 \usage{
-str_endswith(string, suffix, negate = FALSE, ignore_case = FALSE)
+str_endswith(string, suffix)
 }
 \description{
 Check whether a string ends with \code{suffix}.
